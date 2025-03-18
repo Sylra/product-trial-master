@@ -1,5 +1,6 @@
 package me.sylvain.alten.shop.persistence.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -22,16 +23,21 @@ public class Product {
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
+    @Column(nullable = false)
     private String code;
+    @Column(nullable = false)
     private String name;
     private String description;
     private String image;
     private String category;
+    @Column(nullable = false)
     private Double price;
+    @Column(nullable = false)
     private Integer quantity;
     private String internalReference;
     private Long shellId;
-    private InventoryStatus inventoryStatus;
+    @Column(nullable = false)
+    private String inventoryStatus;
     private Integer rating;
     private Long createdAt;
     private Long updatedAt;
