@@ -80,8 +80,7 @@ public class ProductController {
             if (dto.getInventoryStatus() != null) product.setInventoryStatus(dto.getInventoryStatus());
             if (dto.getRating() != null) product.setRating(dto.getRating());
             product.setUpdatedAt(Instant.now().getEpochSecond());
-            productRepository.save(product);
-            return ResponseEntity.ok(product);
+            return ResponseEntity.ok(productRepository.save(product));
         }).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
