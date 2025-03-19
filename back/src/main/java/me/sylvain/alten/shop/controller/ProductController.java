@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
+import me.sylvain.alten.shop.EnvUtil;
 import me.sylvain.alten.shop.persistence.model.Product;
 import me.sylvain.alten.shop.persistence.model.ProductDTO;
 import me.sylvain.alten.shop.persistence.repository.ProductRepository;
@@ -49,6 +52,8 @@ public class ProductController {
 
     @PostMapping
     public ResponseEntity<Product> createProduct(@Valid @RequestBody ProductDTO dto) {
+        if (!isAdminUser()) return ResponseEntity.status(403).build();
+
         Product product = new Product();
         if (dto.getCode() != null) product.setCode(dto.getCode());
         if (dto.getName() != null) product.setName(dto.getName());
@@ -67,6 +72,8 @@ public class ProductController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<Product> updateProduct(@PathVariable Long id, @Valid @RequestBody ProductDTO dto) {
+        if (!isAdminUser()) return ResponseEntity.status(403).build();
+
         return productRepository.findById(id).map(product -> {
             if (dto.getCode() != null) product.setCode(dto.getCode());
             if (dto.getName() != null) product.setName(dto.getName());
@@ -86,10 +93,17 @@ public class ProductController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
+        if (!isAdminUser()) return ResponseEntity.status(403).build();
+
         if (productRepository.findById(id).isPresent()) {
             productRepository.deleteById(id);
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
+    }
+
+    private boolean isAdminUser() {
+        UserDetails account = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return EnvUtil.ADMIN_EMAIL.equals(account.getUsername());
     }
 }
