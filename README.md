@@ -1,3 +1,37 @@
+# Mes notes:
+
+## Backend:
+- Utilisation de Java 17 avec Spring Web pour la création des services web.
+- Gestion de la persistence, utilisation de JPA (Java Persistence API), permettant de définir les opérations CRUD simples et suffisants pour ce projet. 
+- Utilisation d'une base de données sous forme d'un fichier avec H2, qui a l'avantage d'être adapté dans un contexte Java. Ce fichier est crée lors du lancement de l'application, et persiste lors des lancements futurs.
+- Les entités (comme Product) utilisent la dépendence Lombok, permettant de spécifier des annotations à la place de devoir définir les Getter ou Setter par exemple.
+- Utilisation des classes DTO (Data Transfer Object) pour créer une abstraction ou séparation de responsabilité pour les entités, en ne rendant accessible que les propriétés nécessaire pour un Create ou un Update dans le cas de Product. 
+- Ajout de la validation des propriétés, par exemple "name" qui ne doit pas être vide dans la requête.
+- Choix d'une architecture MVC et non MVCS pour rester avec une base plutôt légère. Hormis pour la gestion de la sécurité (point spécifié plus bas)
+- Ajout d'une classe Test pour le controlleur Product.
+- Ajout de Spring Security pour la gestion de l'authentication avec JWT, et de jsonwebtoken.io pour l'utilitaire sur la création et la validation du token.
+- Ajout par défaut d'un utilisateur "admin@admin.com" lors du lancement de l'application pour la première fois.
+- Protection de l'API Product n'autorisant que l'admin à effectuer POST, PATCH et DELETE.
+- Ajout de la liste d'achats en créant une API nommé CartController, avec les tables Cart et CartProduct, dont ce dernier gère la liaison Many-to-Many entre Cart et Product.
+- Ajout de la spécification de l'API dans back/swagger/api.yaml (utilisable par l'outil Swagger).
+- 
+- Temps passé: 16h
+
+
+## Améliorations:
+- Si token invalide ou expiré, il est plus standard de retourner 401 Unauthorized plutôt que 403 Forbidden.
+- La suite de tests actuel n'est plus fonctionnel depuis l'ajout de JWT, et nécessite donc des adaptations.
+- Documentation du code avec des commentaires.
+- Chiffrement du mot de passe pour Account (avec BCrypt par exemple).
+- Lier la liste d'achats (et liste de souhaits) à un utilisateur, pour le moment n'importe quel utilisateur peut agir sur une quelconque liste.
+- Une meilleur couverture de tests unitaires.
+- Limiter le nombre de requêtes dans un interval donné.
+- Le frontend
+
+---
+---
+---
+
 # Consignes
 
 - Vous êtes développeur front-end : vous devez réaliser les consignes décrites dans le chapitre [Front-end](#Front-end)

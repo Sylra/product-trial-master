@@ -1,0 +1,431 @@
+openapi: 3.0.0
+info:
+  title: Alten shop API
+  description: Une liste des API pour intéragir avec l'application Alten shop. Uniquement pour tester l'implémentation actuelle.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/
+paths:
+  /token:
+    post:
+      tags:
+        - Token
+      summary: Génère un token d'authentification.
+      description: Génère un token d'authentification. Ce token est nécessaire pour accéder à certaines ressources de l'API.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: L'email de l'utilisateur.
+                  example: admin@admin.com
+                password:
+                  type: string
+                  description: Le mot de passe de l'utilisateur.
+                  example: password
+      responses:
+        '200':
+          description: OK - Token généré avec succès.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "eyJhbG*******"
+  /account:
+    post:
+      tags:
+        - Account
+      summary: Crée un nouveau compte utilisateur.
+      description: Crée un nouveau compte utilisateur. Ce compte est nécessaire pour accéder à certaines ressources de l'API.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: Le nom d'utilisateur de l'utilisateur.
+                  example: sylvain
+                firstname:
+                  type: string
+                  description: Le prénom de l'utilisateur.
+                  example: Sylvain
+                email:
+                  type: string
+                  description: L'email de l'utilisateur.
+                  example: sylvain@example.com
+                password:
+                  type: string
+                  description: Le mot de passe de l'utilisateur.
+                  example: password
+              required:
+                - username
+                - firstname
+                - email
+                - password
+      responses:
+        '201':
+          description: Compte crée avec succès.
+        '400':
+          description: Bad request - Les données fournies sont incorrectes.
+  /products:
+    get:
+      security:
+        - BearerAuth: []
+      tags:
+        - Products
+      summary: Retourne la liste des produits.
+      description: Retourne la liste des produits.
+      responses:
+        '200':
+          description: La liste des produits.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+    post:
+      security:
+        - BearerAuth: []
+      tags:
+        - Products
+      summary: Crée un nouveau produit.
+      description: Crée un nouveau produit. Seul l'utilisateur admin@admin.com peut créer un produit.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductDTO'
+      responses:
+        '201':
+          description: Produit crée avec succès.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          description: Bad request - Les données fournies sont incorrectes.
+        '403':
+          description: Forbidden - L'utilisateur n'est pas autorisé à créer un produit.
+  /products/{id}:
+    get:
+      security:
+        - BearerAuth: []
+      tags:
+        - Products
+      summary: Retourne un produit par son ID.
+      description: Retourne un produit par son ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: L'ID du produit à retourner.
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      responses:
+        '200':
+          description: Le produit retourné.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '404':
+          description: Not found - Le produit n'existe pas.
+    patch:
+      security:
+        - BearerAuth: []
+      tags:
+        - Products
+      summary: Met à jour un produit.
+      description: Met à jour un produit par son ID. Seul l'utilisateur admin@admin.com peut changer un produit.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: L'ID du produit à changer.
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductDTO'
+      responses:
+        '200':
+          description: Produit mis à jour avec succès.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '404':
+          description: Not found - Le produit n'existe pas.
+        '400':
+          description: Bad request - Les données fournies sont incorrectes.
+        '403':
+          description: Forbidden - L'utilisateur n'est pas autorisé à créer un produit.
+    delete:
+      security:
+        - BearerAuth: []
+      tags:
+        - Products
+      summary: Supprime un produit.
+      description: Supprime un produit par son ID. Seul l'utilisateur admin@admin.com peut supprimer un produit.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: L'ID du produit à supprimer.
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      responses:
+        '204':
+          description: Produit supprimé avec succès.
+        '404':
+          description: Not found - Le produit n'existe pas.
+        '403':
+          description: Forbidden - L'utilisateur n'est pas autorisé à créer un produit.
+  /carts:
+    post:
+      security:
+        - BearerAuth: []
+      tags:
+        - Carts
+      summary: Crée une nouvelle liste d'achats.
+      description: Crée une nouvelle liste d'achats.
+      responses:
+        '201':
+          description: Liste d'achats crée avec succès.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+        '400':
+          description: Bad request - Les données fournies sont incorrectes.
+  /carts/{cartId}/products/{productId}:
+    post:
+      security:
+        - BearerAuth: []
+      tags:
+        - Carts
+      summary: Ajoute un produit à une liste d'achats.
+      description: Ajoute un produit à une liste d'achats.
+      parameters:
+        - name: cartId
+          in: path
+          required: true
+          description: L'ID de la liste d'achats.
+          schema:
+            type: integer
+            format: int64
+          example: 1
+        - name: productId
+          in: path
+          required: true
+          description: L'ID du produit à ajouter.
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      responses:
+        '200':
+          description: Le produit a été ajouté à la liste d'achats.
+        '404':
+          description: Not found - Le produit ou la liste d'achats n'existent pas.
+  /carts/{cartId}/products:
+    get:
+      security:
+        - BearerAuth: []
+      tags:
+        - Carts
+      summary: Retrouve la liste des produits dans une liste d'achats.
+      description: Retrouve la liste des produits dans une liste d'achats.
+      parameters:
+        - name: cartId
+          in: path
+          required: true
+          description: L'ID de la liste d'achats.
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      responses:
+        '200':
+          description: La liste des produits dans la liste d'achats.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CartProduct'
+  /carts/{cartId}/products/{cartProductId}:
+    delete:
+      security:
+        - BearerAuth: []
+      tags:
+        - Carts
+      summary: Supprime un produit d'une liste d'achats.
+      description: Supprime un produit d'une liste d'achats.
+      parameters:
+        - name: cartId
+          in: path
+          required: true
+          description: L'ID de la liste d'achats.
+          schema:
+            type: integer
+            format: int64
+          example: 1
+        - name: cartProductId
+          in: path
+          required: true
+          description: L'ID du produit à supprimer.
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      responses:
+        '204':
+          description: Le produit a été supprimé de la liste d'achats.
+        '404':
+          description: Not found - Le produit ou la liste d'achats n'existent pas.
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        code:
+          type: string
+          example: PROD001
+        name:
+          type: string
+          example: Alten phone
+        description:
+          type: string
+          example: Un téléphone de qualité
+        image:
+          type: string
+          example: http://example.com/image.png
+        category:
+          type: string
+          example: Electronique
+        price:
+          type: number
+          format: double
+          example: 99.99
+        quantity:
+          type: integer
+          example: 100
+        internalReference:
+          type: string
+          example: INTREF001
+        shellId:
+          type: integer
+          format: int64
+          example: 1001
+        inventoryStatus:
+          type: string
+          enum: [INSTOCK, LOWSTOCK, OUTOFSTOCK]
+          example: INSTOCK
+        rating:
+          type: integer
+          example: 4
+        createdAt:
+          type: integer
+          format: int64
+          example: 1633072800
+        updatedAt:
+          type: integer
+          format: int64
+          example: 1633072801
+      required:
+        - code
+        - name
+        - price
+        - quantity
+        - inventoryStatus
+    ProductDTO:
+      type: object
+      properties:
+        code:
+          type: string
+          example: PROD001
+        name:
+          type: string
+          example: Alten phone
+        description:
+          type: string
+          example: Un téléphone de qualité
+        image:
+          type: string
+          example: http://example.com/image.png
+        category:
+          type: string
+          example: Electronique
+        price:
+          type: number
+          format: double
+          example: 99.99
+        quantity:
+          type: integer
+          example: 100
+        internalReference:
+          type: string
+          example: INTREF001
+        shellId:
+          type: integer
+          format: int64
+          example: 1001
+        inventoryStatus:
+          type: string
+          enum: [INSTOCK, LOWSTOCK, OUTOFSTOCK]
+          example: INSTOCK
+        rating:
+          type: integer
+          example: 4
+      required:
+        - code
+        - name
+        - price
+        - quantity
+        - inventoryStatus
+    Cart:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+    CartProduct:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        cart:
+          $ref: '#/components/schemas/Cart'
+        product:
+          $ref: '#/components/schemas/Product'
