@@ -10,6 +10,7 @@ import me.sylvain.alten.shop.persistence.model.Account;
 import me.sylvain.alten.shop.persistence.model.AccountDTO;
 import me.sylvain.alten.shop.persistence.repository.AccountRepository;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 
@@ -25,7 +26,9 @@ public class AccountController {
 
     @PostMapping
     public ResponseEntity<Void> createAccount(@Valid @RequestBody AccountDTO dto) {
-        if (accountRepository.findByEmail(dto.getEmail()).isPresent()) return ResponseEntity.badRequest().build();
+        if (accountRepository.findByEmail(dto.getEmail()).isPresent()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
 
         Account account = new Account();
         if (dto.getEmail() != null) account.setEmail(dto.getEmail());
@@ -33,6 +36,6 @@ public class AccountController {
         if (dto.getPassword() != null) account.setPassword(dto.getPassword());
         if (dto.getUsername() != null) account.setUsername(dto.getUsername());
         accountRepository.save(account);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

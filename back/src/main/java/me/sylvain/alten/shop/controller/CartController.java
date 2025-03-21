@@ -44,31 +44,32 @@ public class CartController {
     @PostMapping("/{cartId}/products/{productId}")
     public ResponseEntity<Void> addProductToCart(@PathVariable Long cartId, @PathVariable Long productId) {
         Cart cart = cartRepository.findById(cartId).orElse(null);
-        if (cart == null) return ResponseEntity.notFound().build();
+        if (cart == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 
         Product product = productRepository.findById(productId).orElse(null);
-        if (product == null) return ResponseEntity.notFound().build();
+        if (product == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 
         CartProduct cartProduct = new CartProduct();
         cartProduct.setCart(cart);
         cartProduct.setProduct(product);
 
         cartProductRepository.save(cartProduct);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @GetMapping("/{cartId}/products")
     public ResponseEntity<List<CartProduct>> getCartProducts(@PathVariable Long cartId) {
+        if (!cartRepository.findById(cartId).isPresent()) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         List<CartProduct> cartProducts = cartProductRepository.findByCartId(cartId);
-        return ResponseEntity.ok(cartProducts);
+        return ResponseEntity.status(HttpStatus.OK).body(cartProducts);
     }
 
     @DeleteMapping("/{cartId}/products/{cartProductId}")
     public ResponseEntity<Void> removeProductFromCart(@PathVariable Long cartId, @PathVariable Long cartProductId) {
         CartProduct cartProduct = cartProductRepository.findById(cartProductId).orElse(null);
-        if (cartProduct == null) return ResponseEntity.notFound().build(); 
+        if (cartProduct == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 
         cartProductRepository.delete(cartProduct);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

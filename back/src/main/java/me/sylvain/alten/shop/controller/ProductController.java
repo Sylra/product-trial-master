@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -35,7 +36,7 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<List<Product>> getAllProducts() {
-        return ResponseEntity.ok(productRepository.findAll());
+        return ResponseEntity.status(HttpStatus.OK).body(productRepository.findAll());
     }
 
 
@@ -44,15 +45,15 @@ public class ProductController {
         Optional<Product> product = productRepository.findById(id);
 
         if (product.isPresent()) {
-            return ResponseEntity.ok(product.get());
+            return ResponseEntity.status(HttpStatus.OK).body(product.get());
         } else {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 
     @PostMapping
     public ResponseEntity<Product> createProduct(@Valid @RequestBody ProductDTO dto) {
-        if (!isAdminUser()) return ResponseEntity.status(403).build();
+        if (!isAdminUser()) return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 
         Product product = new Product();
         if (dto.getCode() != null) product.setCode(dto.getCode());
@@ -67,12 +68,12 @@ public class ProductController {
         if (dto.getInventoryStatus() != null) product.setInventoryStatus(dto.getInventoryStatus());
         if (dto.getRating() != null) product.setRating(dto.getRating());
         product.setCreatedAt(Instant.now().getEpochSecond());
-        return ResponseEntity.ok(productRepository.save(product));
+        return ResponseEntity.status(HttpStatus.CREATED).body(productRepository.save(product));
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<Product> updateProduct(@PathVariable Long id, @Valid @RequestBody ProductDTO dto) {
-        if (!isAdminUser()) return ResponseEntity.status(403).build();
+        if (!isAdminUser()) return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 
         return productRepository.findById(id).map(product -> {
             if (dto.getCode() != null) product.setCode(dto.getCode());
@@ -88,18 +89,18 @@ public class ProductController {
             if (dto.getRating() != null) product.setRating(dto.getRating());
             product.setUpdatedAt(Instant.now().getEpochSecond());
             return ResponseEntity.ok(productRepository.save(product));
-        }).orElseGet(() -> ResponseEntity.notFound().build());
+        }).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
-        if (!isAdminUser()) return ResponseEntity.status(403).build();
+        if (!isAdminUser()) return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 
         if (productRepository.findById(id).isPresent()) {
             productRepository.deleteById(id);
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         }
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
     private boolean isAdminUser() {
