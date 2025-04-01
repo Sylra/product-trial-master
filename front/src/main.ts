@@ -1,4 +1,4 @@
-import { enableProdMode, importProvidersFrom } from "@angular/core";
+import { APP_INITIALIZER, enableProdMode, importProvidersFrom } from "@angular/core";
 
 import { registerLocaleData } from "@angular/common";
 import {
@@ -14,9 +14,19 @@ import { ConfirmationService, MessageService } from "primeng/api";
 import { DialogService } from "primeng/dynamicdialog";
 import { AppComponent } from "./app/app.component";
 import { environment } from "./environments/environment";
+import { TokenService } from "app/shared/services/token.service";
 
 if (environment.production) {
   enableProdMode();
+}
+
+const CREDENTIALS = {
+  email: "admin@admin.com",
+  password: "password",
+}
+
+function initializeApp(authService: TokenService) {
+  return () => authService.fetchToken(CREDENTIALS);
 }
 
 bootstrapApplication(AppComponent, {
@@ -30,6 +40,13 @@ bootstrapApplication(AppComponent, {
     ConfirmationService,
     MessageService,
     DialogService,
+    TokenService,
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeApp,
+      deps: [TokenService],
+      multi: true
+    },
   ],
 }).catch((err) => console.log(err));
 

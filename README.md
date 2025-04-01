@@ -14,11 +14,20 @@
 - Protection de l'API Product n'autorisant que l'admin à effectuer POST, PATCH et DELETE.
 - Ajout de la liste d'achats en créant une API nommé CartController, avec les tables Cart et CartProduct, dont ce dernier gère la liaison Many-to-Many entre Cart et Product.
 - Ajout de la spécification de l'API dans back/swagger/api.yaml (utilisable par l'outil Swagger).
+- Ajout de la Cross Origin Resource Sharing (CORS) pour n'autoriser que des origines distantes définies à accéder au resources du serveur.
 - 
-- Temps passé: 16h
-
+- Temps passé: 17h
+-
+## Frontend:
+- La liste des produits est affiché sous forme de grille (3 par colonnes) pour optimiser l'espace.
+- Gestion automatique du token (dans le localStorage) lors de l'ouverture du site, pouvant ensuite être utilisé par la gestion des produits, qui est presque fonctionelle.
+-
+- Temps passé: 3h
 
 ## Améliorations:
+- Séparation dev et prod
+- Conteneurisation avec Docker.
+### Backend
 - Si token invalide ou expiré, il est plus standard de retourner 401 Unauthorized plutôt que 403 Forbidden.
 - La suite de tests actuel n'est plus fonctionnel depuis l'ajout de JWT, et nécessite donc des adaptations.
 - Documentation du code avec des commentaires.
@@ -26,7 +35,10 @@
 - Lier la liste d'achats (et liste de souhaits) à un utilisateur, pour le moment n'importe quel utilisateur peut agir sur une quelconque liste.
 - Une meilleur couverture de tests unitaires.
 - Limiter le nombre de requêtes dans un interval donné.
-- Le frontend
+### Frontend
+- Authentification manuelle mettant le token dans le localStorage car pour l'instant, cela authentifie l'admin en dur
+- Gestion des erreurs sur ProductService au lieu de rebondir sur le JSON.
+- Validation de la gestion des Produits.
 
 ---
 ---
